@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>كاميرا آيفون - معالجة الألوان الذكية | ملء الشاشة</title>
+    <title>كاميرا Apple - معالجة ألوان احترافية</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: #000;
             height: 100vh;
             width: 100vw;
@@ -23,7 +23,7 @@
             left: 0;
         }
 
-        /* الحاوية الرئيسية - ملء الشاشة تمامًا */
+        /* الحاوية الرئيسية - ملء الشاشة */
         .fullscreen-camera {
             position: fixed;
             top: 0;
@@ -35,7 +35,7 @@
             flex-direction: column;
         }
 
-        /* حاوية الكاميرا تأخذ كل المساحة المتاحة */
+        /* حاوية الكاميرا */
         .camera-wrapper {
             flex: 1;
             position: relative;
@@ -62,66 +62,94 @@
             z-index: 1;
         }
 
-        /* شريط التحكمات - خلفية شفافة مع تأثير زجاجي */
+        /* شريط التحكمات */
         .controls-bar {
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(20px);
             padding: 0.8rem 1rem;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-            border-top: 0.5px solid rgba(255, 255, 255, 0.2);
+            gap: 1rem;
+            border-top: 0.5px solid rgba(255, 255, 255, 0.15);
             z-index: 10;
         }
 
-        button {
-            background: rgba(44, 44, 46, 0.9);
+        /* زر إعادة ضبط صغير */
+        .reset-btn {
+            background: rgba(44, 44, 46, 0.8);
             border: none;
-            padding: 0.7rem 1.2rem;
-            border-radius: 2.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
             color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
+            font-weight: 500;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.2s ease;
             backdrop-filter: blur(4px);
-            flex: 1;
-            min-width: 90px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            letter-spacing: 0.3px;
+            font-family: inherit;
         }
 
-        button.primary {
-            background: #007aff;
-            color: white;
-        }
-
-        button.capture-btn {
-            background: #ffffff;
-            color: #000;
-            box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
-        }
-
-        button:active {
+        .reset-btn:active {
             transform: scale(0.95);
+            background: rgba(80, 80, 90, 0.9);
+        }
+
+        /* زر الالتقاط - شكل تفاحة أبل فضية */
+        .apple-capture {
+            background: linear-gradient(145deg, #e8e8ed, #c0c0c6);
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 0 4px rgba(255,255,255,0.2), inset 0 1px 2px rgba(255,255,255,0.6);
+            border: none;
+            position: relative;
+        }
+        
+        /* شكل التفاحة الفضي (تفاحة مقطوعة) */
+        .apple-icon {
+            width: 48px;
+            height: 48px;
+            background: #2c2c2e;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M18.71 8.21c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'/%3E%3C/svg%3E") no-repeat center;
+            mask-size: contain;
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M18.71 8.21c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'/%3E%3C/svg%3E") no-repeat center;
+            -webkit-mask-size: contain;
+            background-color: #1c1c1e;
+        }
+        
+        .apple-capture:active {
+            transform: scale(0.92);
+            background: linear-gradient(145deg, #d4d4dc, #b0b0b8);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
         }
 
         .status {
-            background: rgba(0,0,0,0.65);
+            background: rgba(0,0,0,0.55);
             backdrop-filter: blur(12px);
-            padding: 0.45rem 1rem;
+            padding: 0.4rem 1rem;
             border-radius: 2rem;
             font-size: 0.7rem;
-            color: #e5e5e5;
+            color: #ddd;
             text-align: center;
             font-weight: 500;
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
             white-space: nowrap;
-            overflow-x: auto;
+            pointer-events: none;
+            z-index: 20;
+            font-family: monospace;
+            letter-spacing: 0.5px;
         }
 
-        /* تأثير فلاش عند التقاط الصورة */
+        /* تأثير فلاش */
         .flash-effect {
             position: fixed;
             top: 0;
@@ -132,18 +160,25 @@
             z-index: 999;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.1s ease;
+            transition: opacity 0.08s ease;
         }
 
         @media (max-width: 600px) {
-            button {
-                padding: 0.6rem 0.9rem;
-                font-size: 0.8rem;
-                min-width: 70px;
+            .apple-capture {
+                width: 72px;
+                height: 72px;
+            }
+            .apple-icon {
+                width: 40px;
+                height: 40px;
+            }
+            .reset-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.75rem;
             }
             .status {
+                bottom: 85px;
                 font-size: 0.65rem;
-                padding: 0.4rem 0.8rem;
             }
         }
     </style>
@@ -155,201 +190,195 @@
         <canvas id="canvas"></canvas>
     </div>
     <div class="controls-bar">
-        <button id="toggleFilterBtn" class="primary">🎨 فلتر ON</button>
-        <button id="captureBtn" class="capture-btn">📸 التقاط</button>
-        <button id="resetBtn">🔄 إعادة ضبط</button>
-        <div class="status" id="statusMsg">✅ جاهز</div>
+        <button class="reset-btn" id="resetBtn">🔄 ضبط</button>
+        <div class="apple-capture" id="captureBtn">
+            <div class="apple-icon"></div>
+        </div>
     </div>
+    <div class="status" id="statusMsg">📱 Apple Camera | ألوان طبيعية</div>
 </div>
 <div id="flash" class="flash-effect"></div>
 
 <script>
     (function() {
-        // --- عناصر DOM ---
+        // عناصر DOM
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const toggleBtn = document.getElementById('toggleFilterBtn');
+        const ctx = canvas.getContext('2d', { willReadFrequently: false });
         const captureBtn = document.getElementById('captureBtn');
         const resetBtn = document.getElementById('resetBtn');
         const statusDiv = document.getElementById('statusMsg');
         const flashDiv = document.getElementById('flash');
 
-        // --- حالة التطبيق ---
-        let filterEnabled = true;
         let animationId = null;
+        let frameRequestActive = true;
 
-        // --- إعدادات المعالجة (ألوان تشبه آيفون) ---
-        let PROCESSING = {
-            contrast: 1.12,
-            saturation: 1.18,
-            brightness: 1.02,
-            gamma: 0.96,
-            shadowBoost: 1.06,
-            highlightProtect: 0.94,
-            whiteBalanceTemp: 1.02
+        // إعدادات المعالجة المحسّنة (جودة عالية + سرعة)
+        // ألوان تشبه iPhone بجودة ProRAW
+        const PROCESSING = {
+            contrast: 1.13,
+            saturation: 1.19,
+            brightness: 1.01,
+            gamma: 0.95,
+            shadowBoost: 1.07,
+            highlightProtect: 0.93,
+            whiteBalanceTemp: 1.03
         };
 
-        // --- دالة معالجة الصورة مثل كاميرا آيفون ---
-        function processiPhoneLikeFilter(imageData) {
+        // دالة معالجة سريعة جداً مع أعلى جودة للألوان
+        function processAppleColorFilter(imageData) {
             const data = imageData.data;
-            const width = imageData.width;
-            const height = imageData.height;
-
-            // Auto White Balance ديناميكي
+            const len = data.length;
+            
+            // AWB سريع (باستخدام عينة من البيكسلات لتسريع العملية)
             let sumR = 0, sumG = 0, sumB = 0;
-            let pixelCount = width * height;
-            for (let i = 0; i < data.length; i += 4) {
+            const step = Math.max(1, Math.floor((len / 4) / 4000)); // عينة ذكية للسرعة
+            for (let i = 0; i < len; i += step * 4) {
                 sumR += data[i];
                 sumG += data[i+1];
                 sumB += data[i+2];
             }
-            const avgR = sumR / pixelCount;
-            const avgG = sumG / pixelCount;
-            const avgB = sumB / pixelCount;
+            const sampleCount = Math.floor(len / (step * 4));
+            const avgR = sumR / sampleCount;
+            const avgG = sumG / sampleCount;
+            const avgB = sumB / sampleCount;
+            
             const gainR = (avgG / avgR) * PROCESSING.whiteBalanceTemp;
             const gainB = (avgG / avgB) * (1 / PROCESSING.whiteBalanceTemp);
             
-            for (let i = 0; i < data.length; i += 4) {
+            // معالجة كل بكسل (حلقة سريعة)
+            for (let i = 0; i < len; i += 4) {
                 let r = data[i];
                 let g = data[i+1];
                 let b = data[i+2];
                 
-                // توازن أبيض
+                // توازن أبيض فوري
                 r = r * gainR;
                 b = b * gainB;
                 
-                let rNorm = r / 255;
-                let gNorm = g / 255;
-                let bNorm = b / 255;
+                // تحويل إلى نطاق 0-1
+                let rNorm = r * 0.00392156862745;
+                let gNorm = g * 0.00392156862745;
+                let bNorm = b * 0.00392156862745;
                 
-                // تباين محسن
-                rNorm = ((rNorm - 0.5) * PROCESSING.contrast) + 0.5;
-                gNorm = ((gNorm - 0.5) * PROCESSING.contrast) + 0.5;
-                bNorm = ((bNorm - 0.5) * PROCESSING.contrast) + 0.5;
+                // تباين احترافي (شبيه بمعالج Apple A-series)
+                rNorm = (rNorm - 0.5) * PROCESSING.contrast + 0.5;
+                gNorm = (gNorm - 0.5) * PROCESSING.contrast + 0.5;
+                bNorm = (bNorm - 0.5) * PROCESSING.contrast + 0.5;
                 
-                // جاما
+                // جاما دقيق
                 rNorm = Math.pow(rNorm, PROCESSING.gamma);
                 gNorm = Math.pow(gNorm, PROCESSING.gamma);
                 bNorm = Math.pow(bNorm, PROCESSING.gamma);
                 
-                // رفع الظلال
-                if (rNorm < 0.45) rNorm = rNorm * PROCESSING.shadowBoost;
-                if (gNorm < 0.45) gNorm = gNorm * PROCESSING.shadowBoost;
-                if (bNorm < 0.45) bNorm = bNorm * PROCESSING.shadowBoost;
+                // رفع الظلال بدقة
+                if (rNorm < 0.48) rNorm *= PROCESSING.shadowBoost;
+                if (gNorm < 0.48) gNorm *= PROCESSING.shadowBoost;
+                if (bNorm < 0.48) bNorm *= PROCESSING.shadowBoost;
                 
-                // حماية الإضاءات العالية
-                if (rNorm > 0.85) rNorm = rNorm * PROCESSING.highlightProtect;
-                if (gNorm > 0.85) gNorm = gNorm * PROCESSING.highlightProtect;
-                if (bNorm > 0.85) bNorm = bNorm * PROCESSING.highlightProtect;
+                // حماية الإضاءات مع احتفاظ بالتفاصيل
+                if (rNorm > 0.86) rNorm *= PROCESSING.highlightProtect;
+                if (gNorm > 0.86) gNorm *= PROCESSING.highlightProtect;
+                if (bNorm > 0.86) bNorm *= PROCESSING.highlightProtect;
                 
-                rNorm = rNorm * PROCESSING.brightness;
-                gNorm = gNorm * PROCESSING.brightness;
-                bNorm = bNorm * PROCESSING.brightness;
+                // سطوع نهائي
+                rNorm *= PROCESSING.brightness;
+                gNorm *= PROCESSING.brightness;
+                bNorm *= PROCESSING.brightness;
                 
-                // تشبع ذكي
+                // تشبع ذكي بنظام Apple
                 const luma = 0.2126 * rNorm + 0.7152 * gNorm + 0.0722 * bNorm;
                 const sat = PROCESSING.saturation;
                 rNorm = luma + (rNorm - luma) * sat;
                 gNorm = luma + (gNorm - luma) * sat;
                 bNorm = luma + (bNorm - luma) * sat;
                 
-                rNorm = Math.min(1.0, Math.max(0.0, rNorm));
-                gNorm = Math.min(1.0, Math.max(0.0, gNorm));
-                bNorm = Math.min(1.0, Math.max(0.0, bNorm));
-                
-                data[i] = Math.floor(rNorm * 255);
-                data[i+1] = Math.floor(gNorm * 255);
-                data[i+2] = Math.floor(bNorm * 255);
+                // قص سريع
+                data[i] = (rNorm > 1.0 ? 255 : (rNorm < 0 ? 0 : (rNorm * 255) | 0));
+                data[i+1] = (gNorm > 1.0 ? 255 : (gNorm < 0 ? 0 : (gNorm * 255) | 0));
+                data[i+2] = (bNorm > 1.0 ? 255 : (bNorm < 0 ? 0 : (bNorm * 255) | 0));
             }
             return imageData;
         }
 
-        function passThrough(imageData) {
-            return imageData;
-        }
-
-        // --- حلقة المعالجة (تطبيق الفلتر بشكل حي) ---
+        // حلقة المعالجة عالية السرعة
         function processFrame() {
+            if (!frameRequestActive) return;
             if (!video.videoWidth || !video.videoHeight) {
                 animationId = requestAnimationFrame(processFrame);
                 return;
             }
 
+            // تحديث حجم الـ canvas مرة واحدة عند التغيير
             if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
+                // تحسين الأداء بتعطيل anti-aliasing غير الضروري
+                ctx.imageSmoothingEnabled = false;
             }
 
+            // رسم الإطار ومعالجته بسرعة فائقة
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const processedData = processAppleColorFilter(imageData);
+            ctx.putImageData(processedData, 0, 0);
             
-            if (filterEnabled) {
-                imageData = processiPhoneLikeFilter(imageData);
-            } else {
-                imageData = passThrough(imageData);
-            }
-            
-            ctx.putImageData(imageData, 0, 0);
             animationId = requestAnimationFrame(processFrame);
         }
 
-        // --- وظيفة التقاط الصورة (مع تأثير فلاش وحفظ) ---
+        // التقاط الصورة بجودة عالية
         function capturePhoto() {
             if (!canvas.width || !canvas.height) {
-                statusDiv.innerHTML = "⚠️ انتظر حتى تعمل الكاميرا";
+                statusDiv.innerHTML = "⏳ انتظر تهيئة الكاميرا";
                 return;
             }
 
-            // تأثير فلاش أبيض
-            flashDiv.style.opacity = "1";
-            setTimeout(() => {
-                flashDiv.style.opacity = "0";
-            }, 150);
+            // تأثير فلاش فوري
+            flashDiv.style.opacity = "0.95";
+            setTimeout(() => { flashDiv.style.opacity = "0"; }, 120);
 
-            // أخذ لقطة من الـ canvas (التي تحتوي على الفلتر إن كان مفعلاً)
+            // التقاط الصورة المعالجة بأعلى جودة (JPEG 0.95)
             const capturedImage = canvas.toDataURL('image/jpeg', 0.95);
             
-            // إنشاء رابط تحميل مؤقت
             const link = document.createElement('a');
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-            link.download = `iPhone_camera_${timestamp}.jpg`;
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+            link.download = `IMG_Apple_${timestamp}.jpg`;
             link.href = capturedImage;
             link.click();
             
-            // عرض رسالة نجاح
-            statusDiv.innerHTML = "📸 تم حفظ الصورة!";
+            // رسالة سريعة
+            statusDiv.innerHTML = "✨ تم الحفظ | Apple Camera";
             setTimeout(() => {
-                if (filterEnabled) statusDiv.innerHTML = "🎨 فلتر آيفون مفعل";
-                else statusDiv.innerHTML = "⚪️ الفلتر معطل";
-            }, 2000);
+                statusDiv.innerHTML = "📱 Apple Camera | ألوان طبيعية";
+            }, 1800);
         }
 
-        // --- إعادة تعيين إعدادات المعالجة ---
+        // إعادة ضبط الإعدادات إلى افتراضي Apple
         function resetToDefault() {
-            PROCESSING.contrast = 1.12;
-            PROCESSING.saturation = 1.18;
-            PROCESSING.brightness = 1.02;
-            PROCESSING.gamma = 0.96;
-            PROCESSING.shadowBoost = 1.06;
-            PROCESSING.highlightProtect = 0.94;
-            PROCESSING.whiteBalanceTemp = 1.02;
-            statusDiv.innerHTML = "🔄 تمت إعادة الضبط إلى إعدادات آيفون";
+            PROCESSING.contrast = 1.13;
+            PROCESSING.saturation = 1.19;
+            PROCESSING.brightness = 1.01;
+            PROCESSING.gamma = 0.95;
+            PROCESSING.shadowBoost = 1.07;
+            PROCESSING.highlightProtect = 0.93;
+            PROCESSING.whiteBalanceTemp = 1.03;
+            statusDiv.innerHTML = "🔄 أعيد ضبط ألوان Apple";
             setTimeout(() => {
-                if (filterEnabled) statusDiv.innerHTML = "🎨 فلتر آيفون مفعل";
-                else statusDiv.innerHTML = "⚪️ الفلتر معطل";
+                statusDiv.innerHTML = "📱 Apple Camera | ألوان طبيعية";
             }, 1500);
         }
 
-        // --- بدء الكاميرا (مع ملء الشاشة تلقائيًا) ---
+        // تشغيل الكاميرا بأعلى جودة وسرعة
         async function initCamera() {
             try {
-                // محاولة استخدام الكاميرا الخلفية للحصول على أفضل جودة
-                let constraints = {
+                // إعدادات الكاميرا لأعلى جودة ممكنة مع سرعة نقل عالية
+                const constraints = {
                     video: {
                         facingMode: { exact: "environment" },
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
+                        width: { ideal: 3840, max: 4096 },
+                        height: { ideal: 2160, max: 2160 },
+                        frameRate: { ideal: 60 }
                     }
                 };
                 
@@ -357,56 +386,40 @@
                 try {
                     stream = await navigator.mediaDevices.getUserMedia(constraints);
                 } catch (err) {
-                    console.warn("خلفية غير متاحة، نستخدم أي كاميرا", err);
-                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    // تجربة الكاميرا الخلفية بدون دقة 4K
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } } 
+                    });
                 }
                 
                 video.srcObject = stream;
-                statusDiv.innerHTML = "📱 كاميرا نشطة | ملء الشاشة";
-                
                 video.onloadedmetadata = () => {
                     video.play();
                     if (animationId) cancelAnimationFrame(animationId);
+                    frameRequestActive = true;
                     animationId = requestAnimationFrame(processFrame);
+                    statusDiv.innerHTML = "📱 Apple Camera | جودة عالية";
                 };
             } catch (error) {
-                console.error("خطأ في الكاميرا:", error);
-                statusDiv.innerHTML = "❌ لا يمكن الوصول للكاميرا";
+                console.error("خطأ الكاميرا:", error);
+                statusDiv.innerHTML = "⚠️ الرجاء السماح بالكاميرا";
             }
         }
 
-        // --- أحداث الأزرار ---
-        toggleBtn.addEventListener('click', () => {
-            filterEnabled = !filterEnabled;
-            if (filterEnabled) {
-                toggleBtn.innerHTML = "🎨 فلتر ON";
-                toggleBtn.classList.add("primary");
-                statusDiv.innerHTML = "✅ تفعيل معالجة الألوان";
-            } else {
-                toggleBtn.innerHTML = "⚪️ فلتر OFF";
-                toggleBtn.classList.remove("primary");
-                statusDiv.innerHTML = "⭕️ تم إيقاف المعالجة";
-            }
-            setTimeout(() => {
-                if (filterEnabled) statusDiv.innerHTML = "🎨 فلتر آيفون مفعل";
-                else statusDiv.innerHTML = "⚪️ الفلتر معطل";
-            }, 1500);
-        });
-        
+        // ربط الأزرار
         captureBtn.addEventListener('click', capturePhoto);
-        resetBtn.addEventListener('click', resetToDefault);
-        
-        // منع الضغط المزدوج على زر التصوير
         captureBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
             capturePhoto();
         });
-        
+        resetBtn.addEventListener('click', resetToDefault);
+
         // بدء التطبيق
         initCamera();
-        
-        // تنظيف عند الخروج
+
+        // تنظيف الموارد عند الإغلاق
         window.addEventListener('beforeunload', () => {
+            frameRequestActive = false;
             if (animationId) cancelAnimationFrame(animationId);
             if (video.srcObject) {
                 video.srcObject.getTracks().forEach(track => track.stop());
