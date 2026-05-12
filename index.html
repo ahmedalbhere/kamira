@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>كاميرا آيفون - معالجة الألوان الذكية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: #000;
+            border-radius: 2rem;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .camera-wrapper {
+            position: relative;
+            background: #000;
+            aspect-ratio: 4 / 3;
+            width: 100%;
+        }
+
+        video, canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 1.5rem;
+        }
+
+        canvas {
+            z-index: 2;
+            pointer-events: none;  /* للسماح بالضغط على الأزرار خلفه */
+        }
+
+        video {
+            z-index: 1;
+        }
+
+        .controls {
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(18px);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        button {
+            background: #2c2c2e;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(4px);
+            flex: 1;
+            min-width: 100px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        button.primary {
+            background: #007aff;
+            color: white;
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        .status {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(12px);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            color: #ddd;
+            text-align: center;
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .title {
+            padding: 0.8rem 1rem;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(20px);
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-align: center;
+            letter-spacing: -0.3px;
+            border-bottom: 0.5px solid rgba(255,255,255,0.2);
+        }
+
+        @media (max-width: 500px) {
+            button {
+                padding: 0.65rem 1rem;
+                font-size: 0.8rem;
+            }
+            .status {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="title">
+        📱 كاميرا آيفون | معالجة ألوان ذكية
+    </div>
+    <div class="camera-wrapper">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="canvas"></canvas>
+    </div>
+    <div class="controls">
+        <button id="toggleFilterBtn" class="primary">🎨 فلتر آيفون ON</button>
+        <button id="resetBtn">🔄 إعادة تعيين</button>
+        <div class="status" id="statusMsg">✅ جاهز ... انتظر الكاميرا</div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // --- عناصر DOM ---
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const toggleBtn = document.getElementById('toggleFilterBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusDiv = document.getElementById('statusMsg');
+
+        // --- حالة التطبيق ---
+        let filterEnabled = true;        // فلتر تحسين الألوان (شبيه بآيفون) مفعل افتراضياً
+        let animationId = null;
+        let streamActive = false;
+
+        // --- إعدادات المعالجة (مضبوطة لتعطي ألوان iPhone-like: دفء طبيعي، تباين معتدل، تشبع ديناميكي) ---
+        const PROCESSING = {
+            contrast: 1.12,      // تباين محسّن (مشابه لـ Smart HDR)
+            saturation: 1.18,    // تشبع ألوان حيادي لكن غني
+            brightness: 1.02,    // رفع بسيط للسطوع
+            gamma: 0.96,         // تصحيح جاما لتفاصيل الظلال
+            shadowBoost: 1.06,   // رفع الظلال بلطف
+            highlightProtect: 0.94, // حماية الإضاءات العالية من الحرق
+            whiteBalanceTemp: 1.02   // دفء طفيف (لون البشرة طبيعي)
+        };
+
+        // --- وظيفة معالجة الصورة مثل كاميرا آيفون (معالجة متقدمة لكل بكسل) ---
+        function processiPhoneLikeFilter(imageData) {
+            const data = imageData.data;
+            const width = imageData.width;
+            const height = imageData.height;
+
+            // 1. أولاً: حساب متوسط RGB لتعديل التوازن الأبيض التلقائي (Auto White Balance)
+            let sumR = 0, sumG = 0, sumB = 0;
+            let pixelCount = width * height;
+            for (let i = 0; i < data.length; i += 4) {
+                sumR += data[i];
+                sumG += data[i+1];
+                sumB += data[i+2];
+            }
+            const avgR = sumR / pixelCount;
+            const avgG = sumG / pixelCount;
+            const avgB = sumB / pixelCount;
+            // نرماليز للقناة الخضراء (مرجع توازن الأبيض الطبيعي)
+            const gainR = (avgG / avgR) * PROCESSING.whiteBalanceTemp;
+            const gainB = (avgG / avgB) * (1 / PROCESSING.whiteBalanceTemp);
+            
+            // 2. المعالجة لكل بكسل (تصحيح ألوان + تباين + تشبع + جاما)
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i];
+                let g = data[i+1];
+                let b = data[i+2];
+                
+                // ---- الخطوة 1: التوازن الأبيض الديناميكي (مفتاح الألوان الطبيعية) ----
+                r = r * gainR;
+                b = b * gainB;
+                
+                // ---- الخطوة 2: تحسين التباين (contrast) ورفع الظلال ----
+                // تحويل إلى نطاق 0-1 للعمليات الحسابية
+                let rNorm = r / 255;
+                let gNorm = g / 255;
+                let bNorm = b / 255;
+                
+                // تطبيق تباين غير خطي (مشابه لمنحنيات آيفون)
+                const contrastFactor = PROCESSING.contrast;
+                rNorm = ((rNorm - 0.5) * contrastFactor) + 0.5;
+                gNorm = ((gNorm - 0.5) * contrastFactor) + 0.5;
+                bNorm = ((bNorm - 0.5) * contrastFactor) + 0.5;
+                
+                // Gamma correction (يحسن التفاصيل في الظلال والإضاءات)
+                const gammaVal = PROCESSING.gamma;
+                rNorm = Math.pow(rNorm, gammaVal);
+                gNorm = Math.pow(gNorm, gammaVal);
+                bNorm = Math.pow(bNorm, gammaVal);
+                
+                // رفع الظلال بشكل انتقائي (shadowBoost) - بدون التأثير على الإضاءات العالية كثيراً
+                if (rNorm < 0.45) rNorm = rNorm * PROCESSING.shadowBoost;
+                if (gNorm < 0.45) gNorm = gNorm * PROCESSING.shadowBoost;
+                if (bNorm < 0.45) bNorm = bNorm * PROCESSING.shadowBoost;
+                
+                // حماية الإضاءات العالية من الكليبات
+                if (rNorm > 0.85) rNorm = rNorm * PROCESSING.highlightProtect;
+                if (gNorm > 0.85) gNorm = gNorm * PROCESSING.highlightProtect;
+                if (bNorm > 0.85) bNorm = bNorm * PROCESSING.highlightProtect;
+                
+                // تحكم بالسطوع العام
+                rNorm = rNorm * PROCESSING.brightness;
+                gNorm = gNorm * PROCESSING.brightness;
+                bNorm = bNorm * PROCESSING.brightness;
+                
+                // ---- الخطوة 3: تشبع ذكي (Saturation) يحافظ على البشرة طبيعياً ----
+                // حساب الإضاءة (luma)
+                const luma = 0.2126 * rNorm + 0.7152 * gNorm + 0.0722 * bNorm;
+                // تطبيق التشبع باستخدام مزج بين القناة الأصلية و luma
+                const sat = PROCESSING.saturation;
+                rNorm = luma + (rNorm - luma) * sat;
+                gNorm = luma + (gNorm - luma) * sat;
+                bNorm = luma + (bNorm - luma) * sat;
+                
+                // قص القيم إلى المدى [0,1]
+                rNorm = Math.min(1.0, Math.max(0.0, rNorm));
+                gNorm = Math.min(1.0, Math.max(0.0, gNorm));
+                bNorm = Math.min(1.0, Math.max(0.0, bNorm));
+                
+                // إعادة التحويل إلى 8-bit
+                data[i] = Math.floor(rNorm * 255);
+                data[i+1] = Math.floor(gNorm * 255);
+                data[i+2] = Math.floor(bNorm * 255);
+                // alpha يبقى كما هو
+            }
+            return imageData;
+        }
+
+        // --- معالجة بدون فلتر (صورة خام من الكاميرا) ---
+        function passThrough(imageData) {
+            // لا تغيير
+            return imageData;
+        }
+
+        // --- الحلقة الرئيسية لقراءة الفيديو وتطبيق المعالجة ---
+        function processFrame() {
+            if (!video.videoWidth || !video.videoHeight) {
+                // الفيديو ليس جاهزاً بعد
+                animationId = requestAnimationFrame(processFrame);
+                return;
+            }
+
+            // ضبط حجم الـ canvas ليتطابق مع حجم الفيديو
+            if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
+
+            // رسم الإطار الحالي من الفيديو إلى canvas (للحصول على ImageData)
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // تطبيق الفلتر إذا كان مفعلاً
+            if (filterEnabled) {
+                imageData = processiPhoneLikeFilter(imageData);
+            } else {
+                imageData = passThrough(imageData);
+            }
+            
+            // إعادة رسم البيانات المعالجة
+            ctx.putImageData(imageData, 0, 0);
+            
+            // استمرار الحلقة
+            animationId = requestAnimationFrame(processFrame);
+        }
+
+        // --- بدء تشغيل الكاميرا ---
+        async function initCamera() {
+            try {
+                // طلب الوصول إلى الكاميرا الخلفية إن أمكن، أو الأمامية (يفضل الخلفية لجودة أفضل)
+                const constraints = {
+                    video: {
+                        facingMode: { exact: "environment" }  // الخلفية مثل آيفون
+                    }
+                };
+                
+                let stream;
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (err) {
+                    // إذا فشل طلب الكاميرا الخلفية، نجرب الكاميرا الأمامية أو أي كاميرا
+                    console.warn("الكاميرا الخلفية غير متاحة، نستخدم الأمامية", err);
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                }
+                
+                video.srcObject = stream;
+                streamActive = true;
+                statusDiv.innerHTML = "📸 كاميرا نشطة | فلتر آيفون يعمل";
+                statusDiv.style.color = "#8bc34a";
+                
+                // الانتظار حتى يبدأ الفيديو بالتشغيل
+                video.onloadedmetadata = () => {
+                    video.play();
+                    // بدء حلقة المعالجة بعد أن يصبح الفيديو جاهزاً
+                    if (animationId) cancelAnimationFrame(animationId);
+                    animationId = requestAnimationFrame(processFrame);
+                };
+            } catch (error) {
+                console.error("خطأ الوصول للكاميرا:", error);
+                statusDiv.innerHTML = "❌ لا يمكن الوصول للكاميرا. تأكد من منح الصلاحيات.";
+                statusDiv.style.color = "#ff9f4a";
+            }
+        }
+        
+        // --- إعادة تعيين إعدادات المعالجة إلى القيم الافتراضية (مثل آيفون) ---
+        function resetToDefault() {
+            PROCESSING.contrast = 1.12;
+            PROCESSING.saturation = 1.18;
+            PROCESSING.brightness = 1.02;
+            PROCESSING.gamma = 0.96;
+            PROCESSING.shadowBoost = 1.06;
+            PROCESSING.highlightProtect = 0.94;
+            PROCESSING.whiteBalanceTemp = 1.02;
+            statusDiv.innerHTML = "🔄 إعادة تعيين الإعدادات إلى معالجة آيفون الأصلية";
+            setTimeout(() => {
+                if (filterEnabled) statusDiv.innerHTML = "🎨 فلتر آيفون مفعل - ألوان طبيعية غنية";
+                else statusDiv.innerHTML = "⚪️ فلتر معطل - صورة خام";
+            }, 1500);
+        }
+        
+        // --- أحداث الأزرار ---
+        toggleBtn.addEventListener('click', () => {
+            filterEnabled = !filterEnabled;
+            if (filterEnabled) {
+                toggleBtn.innerHTML = "🎨 فلتر آيفون ON";
+                toggleBtn.classList.add("primary");
+                statusDiv.innerHTML = "✨ تفعيل معالجة الألوان (شبيهة بآيفون)";
+            } else {
+                toggleBtn.innerHTML = "📷 فلتر OFF";
+                toggleBtn.classList.remove("primary");
+                statusDiv.innerHTML = "⚪️ تم إيقاف المعالجة - صورة خام من الكاميرا";
+            }
+            setTimeout(() => {
+                if (filterEnabled) statusDiv.innerHTML = "🎨 فلتر آيفون مفعل - ألوان طبيعية غنية";
+                else statusDiv.innerHTML = "⚪️ فلتر معطل - صورة خام";
+            }, 1200);
+        });
+        
+        resetBtn.addEventListener('click', () => {
+            resetToDefault();
+        });
+        
+        // --- بدء التطبيق ---
+        initCamera();
+        
+        // تنظيف عند إغلاق الصفحة (وقف الـ stream)
+        window.addEventListener('beforeunload', () => {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            if (video.srcObject) {
+                let tracks = video.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+        });
+    })();
+</script>
+</body>
+</html>
